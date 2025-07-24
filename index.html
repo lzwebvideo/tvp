@@ -2,26 +2,52 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Generador de enlace encriptado</title>
+  <title>Generador Encriptador TVP</title>
   <style>
-    body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; }
-    input, textarea, button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
-    button { background: gold; color: black; font-weight: bold; border: none; cursor: pointer; }
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: gold;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    textarea {
+      width: 80%;
+      height: 80px;
+      margin-top: 20px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <h2>🔐 Generador de enlace encriptado (base64)</h2>
-  <input type="text" id="url" placeholder="Pega aquí tu enlace de video (.mp4 o .m3u8)">
-  <button onclick="generar()">Generar</button>
-  <textarea id="resultado" rows="2" readonly></textarea>
+  <h1>Generador TVP</h1>
+  <input type="text" id="url" placeholder="Pega tu enlace de video aquí">
+  <button onclick="generar()">Generar Enlace Protegido</button>
+  <textarea id="resultado" readonly></textarea>
 
   <script>
     function generar() {
-      var enlace = document.getElementById('url').value.trim();
-      if (!enlace) return alert("Coloca un enlace válido");
-      var encriptado = btoa(enlace); // codificar base64
-      var final = "https://lzwebvideo.github.io/tvp/desencriptador.html?data=" + encriptado;
-      document.getElementById('resultado').value = final;
+      var url = document.getElementById('url').value.trim();
+      if (!url) return alert("Ingresa un enlace");
+      var base64 = btoa(url);
+      var resultado = "https://lzwebvideo.github.io/tvp/desencriptador.html?url=" + base64;
+      document.getElementById('resultado').value = resultado;
     }
   </script>
 </body>
