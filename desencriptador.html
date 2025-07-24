@@ -2,85 +2,63 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Desencriptador TV - LzPlayer</title>
-  <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.5.1/dist/shaka-player.compiled.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reproductor Seguro - Shaka</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
       background-color: #000;
-      color: #fff;
-      font-family: sans-serif;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
     }
     video {
-      width: 90vw;
-      height: auto;
+      width: 100%;
       max-width: 1000px;
-      border-radius: 16px;
-      background-color: #000;
-      outline: none;
+      aspect-ratio: 16/9;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
     }
   </style>
 </head>
 <body>
-
   <video id="video" autoplay controls></video>
 
   <script>
-    // Obtener el parámetro ?data=
-    function getParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    // Decodificar base64 a URL
-    function decodeBase64(str) {
-      try {
-        return decodeURIComponent(atob(str).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-      } catch (e) {
-        return null;
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const data = getParam('data');
-      if (!data) {
-        alert('No se proporcionó ningún dato encriptado.');
-        return;
-      }
-
-      const videoUrl = decodeBase64(data);
-      if (!videoUrl) {
-        alert('Error al decodificar el enlace.');
-        return;
-      }
-
+    async function iniciarReproductor(url) {
       const video = document.getElementById('video');
 
-      // Inicializa Shaka Player (parecido a ExoPlayer)
-      if (shaka.Player.isBrowserSupported()) {
-        const player = new shaka.Player(video);
-        try {
-          await player.load(videoUrl);
-          console.log("✔️ Video cargado:", videoUrl);
-        } catch (error) {
-          console.error('❌ Error al cargar el video:', error);
-          alert("Error al cargar el video.");
-        }
-      } else {
-        alert('Tu navegador no es compatible con Shaka Player.');
+      if (!shaka.Player.isBrowserSupported()) {
+        alert('Tu navegador no es compatible con Shaka Player');
+        return;
       }
-    });
-  </script>
 
+      const player = new shaka.Player(video);
+      try {
+        await player.load(url);
+        console.log('Video cargado con éxito:', url);
+      } catch (e) {
+        console.error('Error al cargar el video', e);
+        alert('No se pudo cargar el video. Revisa el enlace.');
+      }
+    }
+
+    // Obtener URL en base64 desde parámetro ?v=
+    const params = new URLSearchParams(window.location.search);
+    const base64Url = params.get('v');
+
+    if (base64Url) {
+      try {
+        const decodedUrl = atob(base64Url);
+        iniciarReproductor(decodedUrl);
+      } catch (e) {
+        alert('El enlace proporcionado no es válido');
+      }
+    } else {
+      alert('No se proporcionó ningún video');
+    }
+  </script>
 </body>
 </html>
