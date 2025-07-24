@@ -1,54 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Generador Encriptador TVP</title>
+  <meta charset="UTF-8" />
+  <title>Generador Enlace Encriptado - Shaka Player</title>
   <style>
-    body {
-      background: #111;
-      color: #fff;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px;
-      width: 80%;
-      max-width: 500px;
-      border-radius: 5px;
-      border: none;
-      font-size: 16px;
-    }
-    button {
-      background: gold;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    textarea {
-      width: 80%;
-      height: 80px;
-      margin-top: 20px;
-      font-size: 14px;
-      border-radius: 5px;
-    }
+    body { background: #121212; color: #ffd700; font-family: Arial, sans-serif; padding: 20px; }
+    textarea, input, button { width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; border-radius: 5px; border: none; }
+    textarea { height: 100px; resize: vertical; }
+    button { background: #ffd700; color: #121212; font-weight: bold; cursor: pointer; }
+    code { background: #222; display: block; padding: 10px; margin-top: 15px; white-space: pre-wrap; word-break: break-all; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h1>Generador TVP</h1>
-  <input type="text" id="url" placeholder="Pega tu enlace de video aquí">
-  <button onclick="generar()">Generar Enlace Protegido</button>
-  <textarea id="resultado" readonly></textarea>
 
-  <script>
-    function generar() {
-      var url = document.getElementById('url').value.trim();
-      if (!url) return alert("Ingresa un enlace");
-      var base64 = btoa(url);
-      var resultado = "https://lzwebvideo.github.io/tvp/desencriptador.html?url=" + base64;
-      document.getElementById('resultado').value = resultado;
+<h1>Generador de enlace encriptado para Shaka Player</h1>
+
+<label for="inputUrl">Pega tu enlace MP4 o M3U8 aquí:</label>
+<textarea id="inputUrl" placeholder="https://example.com/video.m3u8"></textarea>
+
+<button id="btnGenerar">Generar código</button>
+
+<h2>Enlace encriptado (Base64):</h2>
+<textarea id="encrypted" readonly></textarea>
+
+<h2>Código para insertar en tu página:</h2>
+<code id="codeResult"></code>
+
+<script>
+  // Función para codificar Base64 de forma segura (UTF-8)
+  function base64Encode(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  
+  // Función para generar el código HTML que llama al desencriptador con el texto base64
+  function generarCodigo(encrypted) {
+    // Ajusta la URL del desencriptador según dónde lo alojes
+    const desencriptadorURL = 'desencriptador.html';
+    return `<iframe src="${desencriptadorURL}?data=${encodeURIComponent(encrypted)}" width="100%" height="480" frameborder="0" allowfullscreen></iframe>`;
+  }
+
+  document.getElementById('btnGenerar').onclick = () => {
+    const url = document.getElementById('inputUrl').value.trim();
+    if(!url) {
+      alert('Por favor, pega un enlace válido.');
+      return;
     }
-  </script>
+    const encrypted = base64Encode(url);
+    document.getElementById('encrypted').value = encrypted;
+    document.getElementById('codeResult').textContent = generarCodigo(encrypted);
+  };
+</script>
+
 </body>
 </html>
