@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Desencriptador ExoPlayer</title>
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.5.1/dist/shaka-player.compiled.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    video {
+      width: 90vw;
+      max-width: 1000px;
+      height: auto;
+      border-radius: 12px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <video id="video" autoplay controls></video>
+
+  <script>
+    function getParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    function decodeBase64(str) {
+      try {
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const data = getParam('data');
+      if (!data) {
+        alert('No se proporcionó ningún dato');
+        return;
+      }
+
+      const videoUrl = decodeBase64(data);
+      if (!videoUrl) {
+        alert('Error al decodificar la URL');
+        return;
+      }
+
+      const video = document.getElementById('video');
+
+      if (shaka.Player.isBrowserSupported()) {
+        const player = new shaka.Player(video);
+        try {
+          await player.load(videoUrl);
+          console.log("Reproduciendo:", videoUrl);
+        } catch (error) {
+          console.error('Error al cargar el video:', error);
+          alert("No se pudo cargar el video");
+        }
+      } else {
+        alert('Shaka Player no es compatible con este navegador');
+      }
+    });
+  </script>
+</body>
+</html>
