@@ -1,0 +1,28 @@
+<!-- generador.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de enlace encriptado</title>
+  <style>
+    body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; }
+    input, textarea, button { width: 100%; padding: 10px; margin-top: 10px; }
+    button { background: gold; color: black; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>🔐 Generador de enlace encriptado (base64)</h2>
+  <input type="text" id="url" placeholder="Pega aquí tu enlace de video (.mp4 o .m3u8)">
+  <button onclick="generar()">Generar</button>
+  <textarea id="resultado" rows="2" readonly></textarea>
+  <script>
+    function generar() {
+      var enlace = document.getElementById('url').value.trim();
+      if (!enlace) return alert("Coloca un enlace válido");
+      var encriptado = btoa(enlace); // codificar base64
+      var final = "desencriptador.html?data=" + encriptado;
+      document.getElementById('resultado').value = final;
+    }
+  </script>
+</body>
+</html>
