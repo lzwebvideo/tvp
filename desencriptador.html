@@ -2,63 +2,83 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Reproductor TVP</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.9.0/shaka-player.compiled.js"></script>
+  <title>Reproductor Shaka Player - Desencriptador</title>
   <style>
-    html, body {
-      margin: 0;
-      background: #000;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    body, html {
+      margin: 0; padding: 0; height: 100%; background: #121212; display: flex; justify-content: center; align-items: center; 
+    }
+    #videoContainer {
+      width: 100%; max-width: 900px; height: 500px; position: relative;
     }
     video {
-      width: 100%;
-      max-width: 1000px;
-      aspect-ratio: 16/9;
-      background: #000;
+      width: 100%; height: 100%; background: black;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
 </head>
 <body>
-  <video id="video" controls autoplay></video>
 
-  <script>
-    function getURLParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
+<div id="videoContainer">
+  <video id="video" playsinline controls></video>
+</div>
+
+<script>
+  // Función para decodificar base64 seguro (UTF-8)
+  function base64Decode(str) {
+    try {
+      return decodeURIComponent(escape(atob(str)));
+    } catch(e) {
+      return null;
+    }
+  }
+
+  function getQueryParam(param) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(param);
+  }
+
+  async function initPlayer() {
+    const encryptedData = getQueryParam('data');
+    if(!encryptedData) {
+      alert('No se encontró enlace para reproducir.');
+      return;
     }
 
-    async function iniciarReproductor() {
-      const base64Url = getURLParam("url");
-      if (!base64Url) return alert("No se proporcionó un enlace encriptado.");
-
-      try {
-        const decodedURL = atob(base64Url);
-
-        const video = document.getElementById('video');
-        const player = new shaka.Player(video);
-
-        player.addEventListener('error', function(e) {
-          console.error("Error en reproducción:", e.detail);
-        });
-
-        await player.load(decodedURL);
-        console.log("Video cargado:", decodedURL);
-
-      } catch (err) {
-        alert("Error al decodificar o reproducir el video.");
-        console.error(err);
-      }
+    const url = base64Decode(encryptedData);
+    if(!url) {
+      alert('El enlace está corrupto o no es válido.');
+      return;
     }
 
+    // Inicializar Shaka Player
     shaka.polyfill.installAll();
-    if (shaka.Player.isBrowserSupported()) {
-      iniciarReproductor();
-    } else {
-      alert("Tu navegador no soporta Shaka Player.");
+
+    if (!shaka.Player.isBrowserSupported()) {
+      alert('Navegador no soportado por Shaka Player');
+      return;
     }
-  </script>
+
+    const video = document.getElementById('video');
+    const player = new shaka.Player(video);
+
+    // Escuchar errores
+    player.addEventListener('error', (event) => {
+      console.error('Error de Shaka Player:', event.detail);
+      alert('Error al reproducir el video.');
+    });
+
+    try {
+      // Intentar cargar el video (mp4 o m3u8)
+      await player.load(url);
+      video.play();
+    } catch (e) {
+      console.error('Fallo al cargar video:', e);
+      alert('No se pudo cargar el video.');
+    }
+  }
+
+  window.onload = initPlayer;
+</script>
+
 </body>
 </html>
