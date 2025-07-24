@@ -2,62 +2,62 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reproductor Seguro - Shaka</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.13/shaka-player.compiled.js"></script>
+  <title>Reproductor TVP</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.9.0/shaka-player.compiled.js"></script>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background-color: #000;
+      background: #000;
+      height: 100%;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
     }
     video {
       width: 100%;
       max-width: 1000px;
       aspect-ratio: 16/9;
-      border-radius: 12px;
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+      background: #000;
     }
   </style>
 </head>
 <body>
-  <video id="video" autoplay controls></video>
+  <video id="video" controls autoplay></video>
 
   <script>
-    async function iniciarReproductor(url) {
-      const video = document.getElementById('video');
+    function getURLParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
 
-      if (!shaka.Player.isBrowserSupported()) {
-        alert('Tu navegador no es compatible con Shaka Player');
-        return;
-      }
+    async function iniciarReproductor() {
+      const base64Url = getURLParam("url");
+      if (!base64Url) return alert("No se proporcionó un enlace encriptado.");
 
-      const player = new shaka.Player(video);
       try {
-        await player.load(url);
-        console.log('Video cargado con éxito:', url);
-      } catch (e) {
-        console.error('Error al cargar el video', e);
-        alert('No se pudo cargar el video. Revisa el enlace.');
+        const decodedURL = atob(base64Url);
+
+        const video = document.getElementById('video');
+        const player = new shaka.Player(video);
+
+        player.addEventListener('error', function(e) {
+          console.error("Error en reproducción:", e.detail);
+        });
+
+        await player.load(decodedURL);
+        console.log("Video cargado:", decodedURL);
+
+      } catch (err) {
+        alert("Error al decodificar o reproducir el video.");
+        console.error(err);
       }
     }
 
-    // Obtener URL en base64 desde parámetro ?v=
-    const params = new URLSearchParams(window.location.search);
-    const base64Url = params.get('v');
-
-    if (base64Url) {
-      try {
-        const decodedUrl = atob(base64Url);
-        iniciarReproductor(decodedUrl);
-      } catch (e) {
-        alert('El enlace proporcionado no es válido');
-      }
+    shaka.polyfill.installAll();
+    if (shaka.Player.isBrowserSupported()) {
+      iniciarReproductor();
     } else {
-      alert('No se proporcionó ningún video');
+      alert("Tu navegador no soporta Shaka Player.");
     }
   </script>
 </body>
